@@ -21,6 +21,23 @@ app.use(cors());
 // Routes
 app.use('/articles', articleRoutes);
 
+// Manual trigger for AI Worker (since Cron is not free on Render Config)
+import { exec } from 'child_process';
+app.post('/trigger-ai-update', (req, res) => {
+    console.log('Manual trigger: Starting AI Worker...');
+    // Execute the worker script in the background
+    exec('npm run worker', (error, stdout, stderr) => {
+        if (error) {
+            console.error(`exec error: ${error}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+        console.error(`stderr: ${stderr}`);
+    });
+
+    res.json({ success: true, message: 'AI Worker started in background' });
+});
+
 app.get('/', (req, res) => {
     res.send('BeyondChats Backend API is running...');
 });

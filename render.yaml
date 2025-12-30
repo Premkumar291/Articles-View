@@ -13,6 +13,7 @@ services:
       - key: GROQ_API_KEY
         sync: false # User must provide this in Dashboard
     autoDeploy: true
+    plan: free
 
   # 2. Frontend Static Site
   - type: web
@@ -26,21 +27,4 @@ services:
           type: web
           name: articles-viewer-backend
           property: host
-
-  # 3. AI Worker Cron Job
-  - type: cron
-    name: articles-viewer-ai-worker
-    runtime: node
-    schedule: "0 * * * *" # Runs every hour
-    buildCommand: cd backend/ai-worker && npm install
-    startCommand: cd backend/ai-worker && npm start
-    envVars:
-      - key: MONGO_URI
-        sync: false
-      - key: GROQ_API_KEY
-        sync: false
-      - key: API_URL
-        fromService:
-          type: web
-          name: articles-viewer-backend
-          property: host
+    plan: free
