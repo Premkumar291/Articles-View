@@ -15,11 +15,11 @@ services:
     autoDeploy: true
 
   # 2. Frontend Static Site
-  - type: static
+  - type: web
     name: articles-viewer-frontend
     runtime: static
     buildCommand: cd frontend && npm install && npm run build
-    publishDir: frontend/dist
+    staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
@@ -27,7 +27,7 @@ services:
           name: articles-viewer-backend
           property: url
 
-  # 3. AI Worker Cron Job (Optional - runs periodically)
+  # 3. AI Worker Cron Job
   - type: cron
     name: articles-viewer-ai-worker
     runtime: node
