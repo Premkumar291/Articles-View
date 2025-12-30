@@ -1,25 +1,41 @@
 # BeyondChats Articles Viewer
 
-A full-stack application to scrape, store, and view articles from the BeyondChats blog.
+A full-stack application that scrapes articles from the BeyondChats blog, enhances them using AI (Groq), and displays them in a modern, dual-view interface.
 
-## Project Structure
+## 🚀 Features
 
-This repository is organized into three main components:
+*   **Automated Scraping**: Fetches articles directly from the BeyondChats blog.
+*   **AI Enhancement**: Uses an LLM (Llama 3 via Groq) to rewrite and improve articles by synthesizing information from high-quality external search results (Google).
+*   **Dual-View Interface**: Browse "Original" and "AI Enhanced" articles side-by-side using a clean, responsive React UI.
+*   **Duplicate Prevention**: Intelligently updates existing records and prevents duplicates.
+*   **Modular Architecture**: Separated concerns between the Frontend, Backend API, and the AI Worker service.
 
--   **`frontend/`**: The React application for viewing articles.
--   **`backend/`**: The Express.js API server.
--   **`scraper/`**: A standalone Puppeteer script to fetch articles.
+## 📂 Project Structure
 
-## Prerequisites
+*   **`frontend/`**: A React + Vite application for viewing the articles.
+*   **`backend/`**: The core Express.js API server.
+    *   **`ai-worker/`**: A specialized internal service that handles the AI enhancement pipeline (Search -> Scrape References -> Rewrite).
+    *   **`scripts/`**: Utility scripts for data seeding.
+*   **`scraper/`**: (Legacy) Standalone scraping script.
 
--   Node.js (v14+)
--   MongoDB (Running locally or a cloud URI)
+## 🛠️ Prerequisites
 
-## Installation & Setup
+*   **Node.js** (v18+ recommended)
+*   **MongoDB** (Running locally or a cloud Atlas URI)
+*   **Groq API Key** (For AI features) - Get one at [console.groq.com](https://console.groq.com/)
 
-### 1. Backend Setup
+---
 
-The backend serves the API at `http://localhost:5000`.
+## ⚡ Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd Beyond-charts-assignment/Articles-Viewer
+```
+
+### 2. Backend Setup
+The backend serves the API and controls the AI worker.
 
 ```bash
 cd backend
@@ -32,56 +48,77 @@ PORT=5000
 MONGO_URI=mongodb://localhost:27017/beyondchats_articles
 ```
 
-### 2. Scraper Setup
-
-The scraper fetches articles and saves them to the database.
+### 3. AI Worker Setup
+The AI worker needs your Groq API key to enhance articles.
 
 ```bash
-cd scraper
+cd backend/ai-worker
 npm install
 ```
 
-Create a `.env` file in `scraper/.env`:
+Create a `.env` file in `backend/ai-worker/.env`:
 ```env
-MONGO_URI=mongodb://localhost:27017/beyondchats_articles
+GROQ_API_KEY=your_groq_api_key_here
+# Optional: defaults to http://localhost:5000/articles
+API_URL=http://localhost:5000/articles 
 ```
 
-### 3. Frontend Setup
-
+### 4. Frontend Setup
 The user interface.
 
 ```bash
-cd frontend
+cd ../../frontend
 npm install
 ```
 
-## Running the Project
+---
 
-You will typically need three terminal instances running.
+## 🏃 Running the Application
 
-### 1. Start the Scraper (To fetch data)
-Run this whenever you want to update the latest articles.
+You will need three terminal instances (or use the concurrent scripts).
+
+### Step 1: Seed Initial Data
+Before the AI can enhance anything, you need to fetch the original articles. We use the backend's seeding script for this.
+
+**In the `backend` directory:**
 ```bash
-cd scraper
-npm start
+node scripts/scrapeBlogs.js
 ```
-*   It fetches the latest 5 articles and saves them to MongoDB.
+*   This will scrape the BeyondChats blog and save the initial "Original" articles to MongoDB.
 
-### 2. Start the Backend API
+### Step 2: Start Backend & AI Worker
+This command starts the Express API *and* triggers the AI Worker to process any pending articles.
+
+**In the `backend` directory:**
 ```bash
-cd backend
 npm run dev
 ```
-*   Server runs on `http://localhost:5000`
+*   **API**: Runs on `http://localhost:5000`
+*   **AI Worker**: Will automatically start, find the new articles you just seeded, and begin enhancing them. You will see logs in the terminal as it searches Google and rewrites content.
 
-### 3. Start the Frontend
+> **Note**: The AI Worker runs once per startup. If you add more articles later, restart this command or run `npm run worker` manually.
+
+### Step 3: Start Frontend
+
+**In the `frontend` directory:**
 ```bash
-cd frontend
 npm run dev
 ```
-*   Open your browser at the URL provided (usually `http://localhost:5173`)
+*   Open your browser at `http://localhost:5173`
+*   You should now see the "Original" articles. As the AI worker completes its jobs, the "AI Enhanced" column will populate with the updated versions.
 
-## Features
--   **Automated Scraping**: Puppeteer script fetches content directly from the source.
--   **Duplicate Prevention**: Scraper checks for existing URLs before saving.
--   **Decoupled Architecture**: Scraper and Backend are separate, keeping the production API lightweight.
+---
+
+## 🧩 How the AI Pipeline Works
+
+1.  **Fetch**: The worker looks for articles in the DB that haven't been updated (`isUpdatedVersion: false`).
+2.  **Search**: It uses Puppeteer to search Google for the article's topic.
+3.  **Reference**: It scrapes content from the top 2 relevant search results to use as context.
+4.  **Rewrite**: It sends the original content + reference content to Groq (Llama 3) to produce a high-quality, structured rewrite.
+5.  **Update**: The new version is saved as a new entry in the database with `isUpdatedVersion: true`.
+
+## 🐛 Troubleshooting
+
+*   **MongoDB Connection Error**: Ensure your MongoDB service is running (`mongod`).
+*   **Groq API Error**: Verify your API key is correct in `backend/ai-worker/.env`.
+*   **Puppeteer Issues**: If Puppeteer fails to launch, try installing Chrome manually or ensure all OS dependencies are met.

@@ -49,7 +49,7 @@ export const rewriteArticle = async (originalArticle, referenceContents) => {
                     content: prompt
                 }
             ],
-            model: 'llama3-70b-8192', // Using a capable model available on Groq
+            model: 'llama-3.3-70b-versatile', // Using a capable model available on Groq
         });
 
         const newContent = completion.choices[0]?.message?.content;
