@@ -1,0 +1,46 @@
+services:
+  # 1. Backend API Service
+  - type: web
+    name: articles-viewer-backend
+    runtime: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm run server
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false # User must provide this in Dashboard
+      - key: GROQ_API_KEY
+        sync: false # User must provide this in Dashboard
+    autoDeploy: true
+
+  # 2. Frontend Static Site
+  - type: static
+    name: articles-viewer-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    publishDir: frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: articles-viewer-backend
+          property: url
+
+  # 3. AI Worker Cron Job (Optional - runs periodically)
+  - type: cron
+    name: articles-viewer-ai-worker
+    runtime: node
+    schedule: "0 * * * *" # Runs every hour
+    buildCommand: cd backend/ai-worker && npm install
+    startCommand: cd backend/ai-worker && npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: API_URL
+        fromService:
+          type: web
+          name: articles-viewer-backend
+          property: url
