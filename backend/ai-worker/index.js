@@ -11,7 +11,10 @@ dotenv.config();
 if (!process.env.API_URL) {
     console.warn('API_URL is not defined in environment variables. Defaulting to http://localhost:5000/articles');
 }
-const API_URL = process.env.API_URL || 'http://localhost:5000/articles';
+let API_URL = process.env.API_URL || 'http://localhost:5000/articles';
+if (!API_URL.startsWith('http')) {
+    API_URL = `https://${API_URL}/articles`;
+}
 
 const runAIUpdate = async () => {
     try {
