@@ -1,0 +1,15 @@
+{
+    "name": "articles-scraper",
+    "version": "1.0.0",
+    "description": "Standalone scraper for BeyondChats articles",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "puppeteer": "^24.34.0",
+        "mongoose": "^8.2.0",
+        "dotenv": "^16.4.5"
+    }
+}
