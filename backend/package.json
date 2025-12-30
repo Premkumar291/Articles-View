@@ -4,8 +4,10 @@
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "server": "node src/server.js",
+    "worker": "cd ai-worker && npm start",
+    "start": "concurrently \"npm run server\" \"npm run worker\"",
+    "dev": "concurrently \"nodemon src/server.js\" \"npm run worker\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -17,5 +19,8 @@
     "express": "^5.2.1",
     "mongoose": "^9.0.2",
     "nodemon": "^3.1.11"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
