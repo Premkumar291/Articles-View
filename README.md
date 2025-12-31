@@ -10,6 +10,28 @@ A full-stack application that scrapes articles from the BeyondChats blog, enhanc
 *   **Duplicate Prevention**: Intelligently updates existing records and prevents duplicates.
 *   **Modular Architecture**: Separated concerns between the Frontend, Backend API, and the AI Worker service.
 
+## 🌐 Live Demo
+- **Frontend (Article Viewer)**: [https://articles-view.vercel.app/](https://articles-view.vercel.app/)
+- **Backend API**: [https://articles-view.onrender.com/](https://articles-view.onrender.com/)
+
+## 🏗️ Architecture & Data Flow
+
+```mermaid
+graph TD
+    User[User / Browser] -->|View Articles| Frontend[Frontend (React + Vite)]
+    Frontend -->|REST API Requests| Backend[Backend API (Express.js)]
+    Backend -->|Read/Write Data| DB[(MongoDB Atlas)]
+    
+    subgraph "AI Enhancement Pipeline"
+        Worker[AI Worker Service] -.->|Poll for New Articles| DB
+        Worker -->|1. Search Topic| Google[Google Search]
+        Worker -->|2. Scrape Context| Web[External Websites]
+        Worker -->|3. Enhance Content| Groq[Groq LLM API]
+        Groq -->|Return Rewrite| Worker
+        Worker -->|4. Save Updated Article| DB
+    end
+```
+
 ## 📂 Project Structure
 
 *   **`frontend/`**: A React + Vite application for viewing the articles.
