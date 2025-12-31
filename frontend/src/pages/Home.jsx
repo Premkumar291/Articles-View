@@ -12,7 +12,6 @@ const Home = () => {
         const fetchArticles = async () => {
             try {
                 const data = await getArticles();
-                // Sort by date desc
                 const sorted = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 setArticles(sorted);
             } catch (err) {
@@ -43,7 +42,6 @@ const Home = () => {
         );
     }
 
-    // Group articles by title
     const groupedArticles = articles.reduce((acc, article) => {
         const title = article.title;
         if (!acc[title]) {
@@ -74,7 +72,6 @@ const Home = () => {
                 <div className="space-y-8">
                     {articlePairs.map((pair, index) => (
                         <div key={index} className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-b border-gray-100 pb-8 last:border-0">
-                            {/* Original Article Column */}
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2 pb-2">
                                     <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Original</h2>
@@ -88,7 +85,6 @@ const Home = () => {
                                 )}
                             </div>
 
-                            {/* Enhanced Article Column */}
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2 pb-2">
                                     <h2 className="text-sm font-semibold text-purple-600 uppercase tracking-wide">AI Enhanced</h2>

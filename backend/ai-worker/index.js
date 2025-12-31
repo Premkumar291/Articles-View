@@ -18,72 +18,55 @@ if (!API_URL.startsWith('http')) {
 
 const runAIUpdate = async () => {
     try {
-        console.log('--- Starting AI Article Updater ---');
+        console.log('Starting AI Article Updater...');
 
-        // 1. Fetch articles from Backend
-        console.log('Fetching articles from backend...');
         const response = await axios.get(API_URL);
         const articles = response.data.data;
-
-        // Filter for not-yet-updated articles
         const pendingArticles = articles.filter(a => !a.isUpdatedVersion);
-        console.log(`Found ${pendingArticles.length} articles pending update.`);
 
         if (pendingArticles.length === 0) {
-            console.log('No articles to update.');
+            console.log('No articles pending update.');
             process.exit(0);
         }
 
-        // Process one at a time to be polite
+        console.log(`Found ${pendingArticles.length} articles to process.`);
+
         for (const article of pendingArticles) {
-            console.log(`\nProcessing: "${article.title}"`);
+            try {
+                const referenceLinks = await searchGoogle(article.title);
 
-            // 2. Search Google
-            const referenceLinks = await searchGoogle(article.title);
-            console.log(`Found references: ${referenceLinks.join(', ')}`);
-
-            // 3. Scrape Reference Content
-            const referenceContents = [];
-            for (const link of referenceLinks) {
-                const content = await scrapePageContent(link);
-                if (content) referenceContents.push(content);
-            }
-
-            // 4. Rewrite with LLM
-            const enhancedContent = await rewriteArticle(article, referenceContents);
-
-            // 5. Publish Update
-            if (enhancedContent && enhancedContent !== article.content) {
-                const newArticleData = {
-                    title: article.title, // Keep title or let AI improve it? Keeping for now.
-                    content: enhancedContent,
-                    sourceUrl: article.sourceUrl, // Keeping original source
-                    isUpdatedVersion: true,
-                    references: referenceLinks
-                };
-
-
-                newArticleData.sourceUrl = article.sourceUrl + '-V2';
-
-                try {
-                    await axios.post(API_URL, newArticleData);
-                    console.log(`SUCCESS: Published updated version for "${article.title}"`);
-                } catch (postError) {
-                    console.error('Failed to post updated article:', postError.response?.data || postError.message);
+                const referenceContents = [];
+                for (const link of referenceLinks) {
+                    const content = await scrapePageContent(link);
+                    if (content) referenceContents.push(content);
                 }
-            } else {
-                console.log('Skipping save: Content unchanged or generation failed.');
+
+                const enhancedContent = await rewriteArticle(article, referenceContents);
+
+                if (enhancedContent && enhancedContent !== article.content) {
+                    const newArticleData = {
+                        title: article.title,
+                        content: enhancedContent,
+                        sourceUrl: `${article.sourceUrl}-V2`,
+                        isUpdatedVersion: true,
+                        references: referenceLinks
+                    };
+
+                    await axios.post(API_URL, newArticleData);
+                    console.log(`Updated: "${article.title}"`);
+                }
+            } catch (err) {
+                console.error(`Failed to process "${article.title}":`, err.message);
             }
 
-            // Wait a bit to avoid rate limits
-            await new Promise(r => setTimeout(r, 2000));
+            // Rate limiting delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
         }
 
-        console.log('\n--- AI Update Job Completed ---');
+        console.log('Update job completed.');
         process.exit(0);
-
     } catch (error) {
-        console.error('Fatal Error:', error.message);
+        console.error('Job failed:', error.message);
         process.exit(1);
     }
 };

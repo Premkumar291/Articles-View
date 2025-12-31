@@ -28,7 +28,8 @@ This project is configured for a split deployment strategy:
     *   `GROQ_API_KEY`: Your Groq API key.
     *   `PORT`: `5000` (Optional, Render sets `PORT` automatically).
 6.  Click **Create Web Service**.
-7.  **Copy your Backend URL** (e.g., `https://articles-viewer-backend.onrender.com`) once deployed.
+7.  **Backend URL** - https://articles-view.onrender.com/
+
 
 ### AI Worker (Optional)
 The backend includes an AI worker. You have two options:
@@ -46,8 +47,10 @@ The backend includes an AI worker. You have two options:
     *   **Framework Preset**: Vite
     *   **Root Directory**: Edit and select `frontend`.
 5.  **Environment Variables**:
-    *   `VITE_API_BASE_URL`: Paste your **Render Backend URL** (e.g., `https://articles-viewer-backend.onrender.com`).
+    *   `VITE_API_BASE_URL`: Paste your **Render Backend URL** - https://articles-view.onrender.com/
 6.  Click **Deploy**.
+
+7. **Frontend URL** - https://articles-view.vercel.app/
 
 ---
 
